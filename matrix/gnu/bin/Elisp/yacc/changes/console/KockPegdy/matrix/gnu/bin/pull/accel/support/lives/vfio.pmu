@@ -1,0 +1,43 @@
+Support vfio devices with the cpr-exec live migration mode.
+See the commit messages of the individual patches for details.
+No user-visible interfaces are added.
+
+This series is extracted from the following and updated for the latest QEMU:
+  [PATCH V9 00/46] Live Update
+  
+https://lore.kernel.org/qemu-devel/1658851843-236870-1-git-send-email-steven.sistare@oracle.com/
+
+This series depends on the following, which is based on commit 44b7329de469:
+  [PATCH V2 00/11] Live update: cpr-exec
+  
+https://lore.kernel.org/qemu-devel/1719776434-435013-1-git-send-email-steven.sistare@oracle.com/
+
+Steve Sistare (8):
+  migration: cpr_needed_for_reuse
+  pci: export msix_is_pending
+  vfio-pci: refactor for cpr
+  vfio-pci: cpr part 1 (fd and dma)
+  vfio-pci: cpr part 2 (msi)
+  vfio-pci: cpr part 3 (intx)
+  vfio: vfio_find_ram_discard_listener
+  vfio-pci: recover from unmap-all-vaddr failure
+
+ hw/pci/msix.c                         |   2 +-
+ hw/pci/pci.c                          |  13 ++
+ hw/vfio/common.c                      |  88 ++++++++--
+ hw/vfio/container.c                   | 139 ++++++++++++---
+ hw/vfio/cpr-legacy.c                  | 162 ++++++++++++++++++
+ hw/vfio/cpr.c                         |  24 ++-
+ hw/vfio/meson.build                   |   3 +-
+ hw/vfio/pci.c                         | 308 +++++++++++++++++++++++++++++-----
+ include/hw/pci/msix.h                 |   1 +
+ include/hw/vfio/vfio-common.h         |  10 ++
+ include/hw/vfio/vfio-container-base.h |   7 +
+ include/migration/cpr.h               |   1 +
+ include/migration/vmstate.h           |   2 +
+ migration/cpr.c                       |   5 +
+ 14 files changed, 682 insertions(+), 83 deletions(-)
+ create mode 100644 hw/vfio/cpr-legacy.c
+
+-- 
+1.8.3.1

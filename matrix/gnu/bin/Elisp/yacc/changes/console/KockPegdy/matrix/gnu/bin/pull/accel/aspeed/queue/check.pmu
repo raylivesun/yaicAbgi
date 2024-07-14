@@ -1,0 +1,39 @@
+The following changes since commit 44b7329de469c121555a1acf9b288f3ae71b8e61:
+
+  Merge tag 'pull-qapi-2024-07-06' of https://repo.or.cz/qemu/armbru into 
+staging (2024-07-07 13:23:28 -0700)
+
+are available in the Git repository at:
+
+  https://github.com/legoater/qemu/ tags/pull-aspeed-20240709
+
+for you to fetch changes up to d847ea7cfc6321e2519f587d4077428d90557178:
+
+  machine_aspeed.py: update to test network for AST2700 (2024-07-09 08:05:44 
++0200)
+
+----------------------------------------------------------------
+aspeed queue:
+
+* support AST2700 network
+
+----------------------------------------------------------------
+Jamin Lin (8):
+      hw/net:ftgmac100: update memory region size to 64KB
+      hw/net:ftgmac100: update ring base address to 64 bits
+      hw/net:ftgmac100: introduce TX and RX ring base address high registers to 
+support 64 bits
+      hw/net:ftgmac100: update TX and RX packet buffers address to 64 bits
+      aspeed/soc: set dma64 property for AST2700 ftgmac100
+      hw/block: m25p80: support quad mode for w25q01jvq
+      machine_aspeed.py: update to test ASPEED OpenBMC SDK v09.02 for AST2700
+      machine_aspeed.py: update to test network for AST2700
+
+ include/hw/net/ftgmac100.h      |  17 +++--
+ hw/arm/aspeed_ast27x0.c         |   3 +
+ hw/block/m25p80.c               |  16 +++++
+ hw/net/ftgmac100.c              | 147 +++++++++++++++++++++++++++++++++-------
+ tests/avocado/machine_aspeed.py |  12 ++--
+ 5 files changed, 162 insertions(+), 33 deletions(-)
+
+

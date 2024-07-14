@@ -1,0 +1,285 @@
+*** Welcome to IELM ***  Type (describe-mode) or press C-h m for help.
+ELISP> (defun freezer-checkup-list (retro)
+  "The documentation series of features of card"
+  (let* (indent-region 1 0 512)
+    (setf x 512 y 512))
+  (setq x 512))
+
+freezer-checkup-list
+ELISP> (defun keymap-checkup-list (retro)
+  "The documentation series in checkup of maps"
+  (let* (indent-region 1 0 512)
+    (setf x 512 y 512))
+  (setq x 512)
+  (check-parens))
+
+keymap-checkup-list
+ELISP> (defun coffee-script-elisp (retro)
+  "The documentation coffee script in elisp to reporter pages"
+  (let* (indent-region 1 0 512)
+    (setf x 512 y 512)
+    (setq x 512))
+  (keymap-global-set 27 home))
+
+coffee-script-elisp
+ELISP> (defun coffee-script-elisp (retro)
+  "The documentation coffee script in elisp to reporter pages"
+  (let* (indent-region 1 0 512)
+    (setf x 512 y 512)
+    (setq x 512))
+  (keymap-global-set 27 home))
+
+coffee-script-elisp
+ELISP> (defun coffee-script-elisp (retro)
+	 "The documentation coffee script in elisp to reporter pages"
+	 (let* (indent-region 1 0 512)
+	   (setf x 512 y 512)
+	   (setq x 512))
+	 (keymap-local-set 27 home))
+coffee-script-elisp
+ELISP> (freezer-checkup-list 512)
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list (listp 512))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list (listp 1))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list 1)
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list x (+ x y))
+*** Eval error ***  Symbol’s value as variable is void: x
+ELISP> (freezer-checkup-list (+ x y))
+*** Eval error ***  Symbol’s value as variable is void: x
+ELISP> (freezer-checkup-list (setq x 512))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list (listp (setq x 512)))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list 0)
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list '1)
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list '(listp 1))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list retro)
+*** Eval error ***  Symbol’s value as variable is void: retro
+ELISP> (freezer-checkup-list '(retro))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list (indent-region 1 0 512))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list (+ 1 512))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list x)
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list 'x)
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list (check-parens))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (keymap-checkup-list (check-parens))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (coffee-script-elisp (keymap-local-set 27 home))
+*** Eval error ***  Symbol’s value as variable is void: home
+ELISP> (coffee-script-elisp (keymap-local-set 27 x))
+*** Eval error ***  27 is not a valid key definition; see ‘key-valid-p’
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 1329) x))
+*** Eval error ***  nil is not a valid key definition; see ‘key-valid-p’
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) nil))
+*** Eval error ***  nil is not a valid key definition; see ‘key-valid-p’
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) home) nil)
+*** Eval error ***  Symbol’s value as variable is void: home
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) local) nil)
+*** Eval error ***  Symbol’s value as variable is void: local
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) (local-unset-key 27)) nil) 
+*** Eval error ***  Wrong type argument: arrayp, 27
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) (local-unset-key (arrayp 1 0 512)) nil) nil)
+*** Eval error ***  Wrong number of arguments: arrayp, 3
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) (local-unset-key 0) nil) nil)
+*** Eval error ***  Wrong type argument: arrayp, 0
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) (local-unset-key 512) nil) nil)
+*** Eval error ***  Wrong type argument: arrayp, 512
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) (local-unset-key 27) nil) nil)
+*** Eval error ***  Wrong type argument: arrayp, 27
+ELISP> (defun changes-toggle-input-method (retro)
+  "The documentation checkup list template plums pages"
+  (let* (indent-region 4 0 512)
+    (toggle-input-method arg (list 512))
+    (setq x 512)))
+changes-toggle-input-method
+ELISP> (changes-toggle-input-method (set p 512)) 
+*** Eval error ***  Symbol’s value as variable is void: p
+ELISP> (changes-toogle-input-method (set x 512))
+*** Eval error ***  Symbol’s function definition is void: changes-toogle-input-method
+ELISP> (changes-toggle-input-method (set x 512))
+*** Eval error ***  Wrong type argument: symbolp, 512
+ELISP> (changes-toggle-input-method (symbolp dest))
+*** Eval error ***  Symbol’s value as variable is void: dest
+ELISP> (changes-toggle-input-method (symbolp ~/))
+*** Eval error ***  Symbol’s value as variable is void: ~/
+ELISP> (changes-toggle-input-method (symbol ~ ))
+*** Eval error ***  Symbol’s function definition is void: symbol
+ELISP> (changes-toggle-input-method (symbolp ~ ))
+*** Eval error ***  Symbol’s value as variable is void: ~
+ELISP> (changes-toggle-input-method (car '(dest value))) 
+*** Eval error ***  Wrong type argument: listp, 4
+ELISP> (changes-toggle-input-method (car '((dest value)
+					   (come pres))))
+					   
+*** Eval error ***  Wrong type argument: listp, 4
+ELISP> (changes-toggle-input-method (bar))  
+*** Eval error ***  Symbol’s function definition is void: bar
+ELISP> ;; documentation to elisp and cro lisp
+(defun elcro-lisp-match (eldoc-mode)
+  (if (check-declare-file)
+      (t (function file)
+	 (check-declare-directory))
+    (let* (setf x 512 y 512)
+      (setq x (+ x y)))
+    (check-parens))
+  (pop)) 
+
+elcro-lisp-match
+ELISP> (elcro-lisp-match (eldoc-mode business))
+*** Eval error ***  Symbol’s value as variable is void: business
+ELISP> (elcro-lisp-match (eldoc-mode arg))
+*** Eval error ***  Symbol’s value as variable is void: arg
+ELISP> (elcro-lisp-match (eldoc-mode 512))
+*** Eval error ***  Wrong number of arguments: (1 . 1), 0
+ELISP> (elcro-lisp-match (eldoc-mode (setq x '1 . 1)))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (elcro-lisp-math (eldoc-mode (setq x 612)))
+*** Eval error ***  Symbol’s function definition is void: elcro-lisp-math
+ELISP> (elcro-lisp-match (eldoc-mode (setq x 612)))
+*** Eval error ***  Wrong number of arguments: (1 . 1), 0
+ELISP> (elcro-lisp-match (eldoc-mode (setq x (1 . 1))))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (elcro-lisp-match (eldoc-mode (listp 1)))
+*** Eval error ***  Wrong number of arguments: (1 . 1), 0
+ELISP> (elcro-lisp-match (eldoc-mode '(1 . 1)))
+*** Eval error ***  Wrong number of arguments: (1 . 1), 0
+ELISP> (elcro-lisp-match (eldoc-mode 1))
+*** Eval error ***  Wrong number of arguments: (1 . 1), 0
+ELISP> (elcro-lisp-match (eldoc-mode nil))
+*** Eval error ***  Wrong number of arguments: (1 . 1), 0
+ELISP> (backward-page 512)
+nil
+ELISP> (defun pages-number-values (backward-page)
+  "The documentation backward pages business"
+  (if (backward-page)
+      (let* (setq x 512)
+	(t (function x)
+	   (listp x))))
+  (list x))
+pages-number-values
+ELISP> (pages-number-values (backward-page 512))
+(612)
+
+ELISP> (let* (setq x 512)
+  (t (function x)
+     (t (lambda x
+	  "The documenttion types"
+	  (listp x)))))
+
+*** Eval error ***  Wrong type argument: listp, 512
+ELISP> (defun password-local-topic (check-parens)
+  "The documentation check parens to local password."
+  (if (check-parens)
+    (let* (setq x 512)
+  (t (function x)
+     (t (lambda x
+	  "The documenttion types"
+	  (listp x)))))
+    (check-declare-file))
+  (list x))
+
+password-local-topic
+ELISP> (password-local-topic (check-parens))
+*** Eval error ***  Wrong number of arguments: (1 . 1), 0
+ELISP> (password-local-topic 16)
+*** Eval error ***  Wrong number of arguments: (1 . 1), 0
+ELISP> (password-local-topic nil)
+*** Eval error ***  Wrong number of arguments: (1 . 1), 0
+ELISP> (password-local-topic (listp 16))
+*** Eval error ***  Wrong number of arguments: (1 . 1), 0
+ELISP> (defun count-load-pop (load-library)
+  "The documentation load library count pop."
+  (if (load-library)
+      (t (function library)
+	 (setq library 512))
+    (listp library))
+  (list library))
+
+count-load-pop
+ELISP> (count-load-pop (load-library 512))
+*** Eval error ***  Wrong type argument: stringp, 512
+ELISP> (count-load-pop (load-library (stringp 512)))
+*** Eval error ***  Wrong type argument: stringp, nil
+ELISP> (count-load-pop (load-library (stringp nil)))
+*** Eval error ***  Wrong type argument: stringp, nil
+ELISP> (count-load-pop (load-library library))
+*** Eval error ***  Symbol’s value as variable is void: library
+ELISP> (count-load-pop (load-library has*))
+*** Eval error ***  Symbol’s value as variable is void: has*
+ELISP> (count-load-pop (load-library (pop 512)))
+*** Eval error ***  Invalid place expression: 512
+ELISP> (count-load-pop (load-library (pop library)))
+*** Eval error ***  Symbol’s value as variable is void: library
+ELISP> (count-load-pop (load-library (pop (load "" 0 pop match ~/))))
+*** Eval error ***  Symbol’s value as variable is void: pop
+ELISP> (count-load-pop (load-library (pop (load "" 0 nil  match ~/))))
+*** Eval error ***  Symbol’s value as variable is void: match
+ELISP> (count-load-pop (load-library (pop (load "" 0 nil t  ~/))))
+*** Eval error ***  Symbol’s value as variable is void: ~/
+ELISP> (count-load-pop (load-library (pop (load "" 0 nil t '~/))))
+*** Eval error ***  Symbol’s function definition is void: \(setf\ load\)
+ELISP> (count-load-pop (load-library (pop (load "" 0 nil t '\(setf\load\)))))
+*** Eval error ***  Symbol’s function definition is void: \(setf\ load\)
+ELISP> (count-load-pop (load-library (pop (load "" 0 nil t 'setf))))
+*** Eval error ***  Symbol’s function definition is void: \(setf\ load\)
+ELISP> (count-load-pop (load-library (pop (setf "" 0 nil 0))))
+*** Eval error ***  Invalid place expression: ""
+ELISP> (count-load-pop (load-library (pop (setf nil 0 nil 0))))
+*** Eval error ***  Attempt to set a constant symbol: nil
+ELISP> (count-load-pop (load-library (pop (setf x 512 y 512))))
+*** Eval error ***  Symbol’s function definition is void: \(setf\ setq\)
+ELISP> (count-load-pop (load-library (pop (setq 512))))
+*** Eval error ***  Wrong number of arguments: setq, 1
+ELISP> (defun evel-region-setting (eval-region)
+  "The documentation `setting' `eval' `region' to history book."
+  (if (eval-region)
+      (t (function eval-region)
+	 (autoload)))
+  (pop))
+
+evel-region-setting
+ELISP> (defun eval-region-setting (eval-region)
+  "The documentation `setting' `eval' `region' to history book."
+  (if (eval-region)
+      (t (function eval-region)
+	 (autoload)))
+  (pop))
+
+eval-region-setting
+ELISP> (eval-region-setting (eval-region 1 0 512 x))
+*** Eval error ***  Args out of range: 1, 0
+ELISP> (eval-region-setting (eval-region 512 512 512 x))
+*** Eval error ***  Wrong number of arguments: eval-region, 0
+ELISP> (eval-region-setting (eval-region 512 0 512 x))
+*** Eval error ***  Args out of range: 1, 0
+ELISP> (eval-region-setting (eval 512 0))
+*** Eval error ***  Wrong number of arguments: eval-region, 0
+ELISP> (eval-region-setting (eval-region 1 0 1 0))
+*** Eval error ***  Args out of range: 1, 0
+ELISP> (defun lisp-server-buffer (eval-buffer)
+  "The documenation `popcorn' and `netbeans' `lisp' "
+  (if (eval-buffer)
+      (t (function eval-buffer)
+	 (eval-buffer))
+    (listp 512)))
+
+lisp-server-buffer
+ELISP> (lisp-server-buffer (eval-buffer 512 0 "" 512 512))
+*** Eval error ***  Wrong type argument: stringp, 512
+ELISP> (lisp-server-buffer (eval-buffer 512 0 "" 12 27)
+			   )
+*** Eval error ***  Wrong type argument: stringp, 512
+ELISP> (lisp-server-buffer (eval-buffer (buffer-menu 0) 0 "" 12 27))
+*** Eval error ***  No such buffer
+ELISP> 

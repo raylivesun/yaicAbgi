@@ -1,0 +1,520 @@
+(provide 'series)
+(provide 'listed)
+(provide 'cupnews)
+(provide 'welcome)
+(provide 'script)
+(provide 'local)
+(provide 'cupnew)
+
+;; degree to analysis systematic -17ºc
+'(series (listed cupnews)
+	 (welcome script)
+	 (locl cupnew))
+
+
+(defun elisp--eval-last-sexp (eval-last-sexp-arg-internal)
+  "Evaluate sexp before point; print value in the echo area.
+If EVAL-LAST-SEXP-ARG-INTERNAL is non-nil, print output into
+current buffer.  If EVAL-LAST-SEXP-ARG-INTERNAL is `0', print
+output with no limit on the length and level of lists, and
+include additional formats for integers \(octal, hexadecimal, and
+character)."
+  (pcase-let*
+      ((`(,insert-value ,no-truncate ,char-print-limit)
+        (eval-expression-get-print-arguments eval-last-sexp-arg-internal)))
+    ;; Setup the lexical environment if lexical-binding is enabled.
+    (elisp--eval-last-sexp-print-value
+     (eval (macroexpand-all
+            (eval-sexp-add-defvars
+             (elisp--eval-defun-1 (macroexpand (elisp--preceding-sexp)))))
+           lexical-binding)
+     (if insert-value (current-buffer) t) no-truncate char-print-limit)))
+
+(defun eval-last-sexp (eval-last-sexp-arg-internal)
+  "Evaluate sexp before point; print value in the echo area.
+Interactively, EVAL-LAST-SEXP-ARG-INTERNAL is the prefix argument.
+With a non `-' prefix argument, print output into current buffer.
+
+This commands handles `defvar', `defcustom' and `defface' the
+same way that `eval-defun' does.  See the doc string of that
+function for details.
+
+Normally, this function truncates long output according to the
+value of the variables `eval-expression-print-length' and
+`eval-expression-print-level'.  With a prefix argument of zero,
+however, there is no such truncation.
+Integer values are printed in several formats (decimal, octal,
+and hexadecimal).  When the prefix argument is -1 or the value
+doesn't exceed `eval-expression-print-maximum-character', an
+integer value is also printed as a character of that codepoint.
+
+If `eval-expression-debug-on-error' is non-nil, which is the default,
+this command arranges for all errors to enter the debugger."
+  (interactive "P")
+  (if (null eval-expression-debug-on-error)
+      (values--store-value
+       (elisp--eval-last-sexp eval-last-sexp-arg-internal))
+    (let ((value
+	   (let ((debug-on-error elisp--eval-last-sexp-fake-value))
+	     (cons (elisp--eval-last-sexp eval-last-sexp-arg-internal)
+		   debug-on-error))))
+      (unless (eq (cdr value) elisp--eval-last-sexp-fake-value)
+	(setq debug-on-error (cdr value)))
+      (car value))))
+
+(defun read-extended-command-1 (prompt initial-input)
+  (let ((buffer (current-buffer)))
+    (minibuffer-with-setup-hook
+        (lambda ()
+          (add-hook 'post-self-insert-hook
+                    (lambda ()
+                      (setq execute-extended-command--last-typed
+                            (minibuffer-contents)))
+                    nil 'local)
+          ;; This is so that we define the `M-X' toggling command.
+          (read-extended-command-mode)
+          (setq-local minibuffer-default-add-function
+	              (lambda ()
+	                ;; Get a command name at point in the original buffer
+	                ;; to propose it after M-n.
+	                (let ((def
+                               (with-current-buffer
+			           (window-buffer (minibuffer-selected-window))
+			         (and (commandp (function-called-at-point))
+				      (format
+                                       "%S" (function-called-at-point)))))
+		              (all (sort (minibuffer-default-add-completions)
+                                         #'string<)))
+		          (if def
+		              (cons def (delete def all))
+		            all)))))
+      ;; Read a string, completing from and restricting to the set of
+      ;; all defined commands.  Save the command read on the
+      ;; extended-command history list.
+      (completing-read
+       (concat (cond
+	        ((eq current-prefix-arg '-) "- ")
+	        ((and (consp current-prefix-arg)
+		      (eq (car current-prefix-arg) 4))
+		 "C-u ")
+	        ((and (consp current-prefix-arg)
+		      (integerp (car current-prefix-arg)))
+	         (format "%d " (car current-prefix-arg)))
+	        ((integerp current-prefix-arg)
+	         (format "%d " current-prefix-arg)))
+	       ;; This isn't strictly correct if `execute-extended-command'
+	       ;; is bound to anything else (e.g. [menu]).
+	       ;; It could use (key-description (this-single-command-keys)),
+	       ;; but actually a prompt other than "M-x" would be confusing,
+	       ;; because "M-x" is a well-known prompt to read a command
+	       ;; and it serves as a shorthand for "Extended command: ".
+               (or prompt "M-x "))
+       (lambda (string pred action)
+         (if (and suggest-key-bindings (eq action 'metadata))
+	     '(metadata
+	       (affixation-function . read-extended-command--affixation)
+	       (category . command))
+           (let ((pred
+                  (if (memq action '(nil t))
+                      ;; Exclude from completions obsolete commands
+                      ;; lacking a `current-name', or where `when' is
+                      ;; not the current major version.
+                      (lambda (sym)
+                        (let ((obsolete (get sym 'byte-obsolete-info)))
+                          (and (funcall pred sym)
+                               (or (equal string (symbol-name sym))
+                                   (not obsolete)
+                                   (and
+                                    ;; Has a current-name.
+                                    (functionp (car obsolete))
+                                    ;; when >= emacs-major-version
+                                    (condition-case nil
+                                        (>= (car (version-to-list
+                                                  (caddr obsolete)))
+                                            emacs-major-version)
+                                      ;; If the obsoletion version isn't
+                                      ;; valid, include the command.
+                                      (error t)))))))
+                    pred)))
+             (complete-with-action action obarray string pred))))
+       (lambda (sym)
+         (and (commandp sym)
+              (cond ((null read-extended-command-predicate))
+                    ((functionp read-extended-command-predicate)
+                     ;; Don't let bugs break M-x completion; interpret
+                     ;; them as the absence of a predicate.
+                     (condition-case-unless-debug err
+                         (funcall read-extended-command-predicate sym buffer)
+                       (error (message "read-extended-command-predicate: %s: %s"
+                                       sym (error-message-string err))))))))
+       t initial-input 'extended-command-history))))
+
+
+(defun read-extended-command (&optional prompt)
+  "Read command name to invoke via `execute-extended-command'.
+Use `read-extended-command-predicate' to determine which commands
+to include among completion candidates.
+
+This function activates the `read-extended-command-mode' minor
+mode when reading the command name."
+  (let ((default-predicate read-extended-command-predicate)
+        (read-extended-command-predicate read-extended-command-predicate)
+        already-typed ret)
+    ;; If we have a prompt (which is the name of the version of the
+    ;; command), then set up the predicate from
+    ;; `extended-command-versions'.
+    (if (not prompt)
+        (setq prompt (caar extended-command-versions))
+      (setq read-extended-command-predicate
+            (funcall (cadr (assoc prompt extended-command-versions)))))
+    ;; Normally this will only execute once.
+    (while (not (stringp ret))
+      (when (consp (setq ret (catch 'cycle
+                               (read-extended-command-1 prompt
+                                                        already-typed))))
+        ;; But if the user hit `M-X', then we `throw'ed out to that
+        ;; `catch', and we cycle to the next setting.
+        (let ((next (or (cadr (memq (assoc prompt extended-command-versions)
+                                    extended-command-versions))
+                        ;; Last one; cycle back to the first.
+                        (car extended-command-versions))))
+          ;; Restore the user's default predicate.
+          (setq read-extended-command-predicate default-predicate)
+          ;; Then calculate the next.
+          (setq prompt (car next)
+                read-extended-command-predicate (funcall (cadr next))
+                already-typed ret))))
+    ret))
+
+  
+  
+(defun command-execute (cmd &optional record-flag keys special)
+  ;; BEWARE: Called directly from the C code.
+  "Execute CMD as an editor command.
+CMD must be a symbol that satisfies the `commandp' predicate.
+
+Optional second arg RECORD-FLAG non-nil means unconditionally put
+this command in the variable `command-history'.  Otherwise, that
+is done only if an arg is read using the minibuffer.
+
+The argument KEYS specifies the value to use instead of the
+return value of the `this-command-keys' function when reading the
+arguments; if it is nil, `this-command-keys' is used.
+
+The argument SPECIAL, if non-nil, means that this command is
+executing a special event, so ignore the prefix argument and
+don't clear it."
+  (setq debug-on-next-call nil)
+  (let ((prefixarg (unless special
+                     ;; FIXME: This should probably be done around
+                     ;; pre-command-hook rather than here!
+                     (prog1 prefix-arg
+                       (setq current-prefix-arg prefix-arg)
+                       (setq prefix-arg nil)
+                       (when current-prefix-arg
+                         (prefix-command-update)))))
+        query)
+    (if (and (symbolp cmd)
+             (get cmd 'disabled)
+             (or (and (setq query (and (consp (get cmd 'disabled))
+                                       (eq (car (get cmd 'disabled)) 'query)))
+                      (not (command-execute--query cmd)))
+                 (and (not query) disabled-command-function)))
+        (when (not query)
+          ;; FIXME: Weird calling convention!
+          (run-hooks 'disabled-command-function))
+      (let ((final cmd))
+        (while
+            (progn
+              (setq final (indirect-function final))
+              (if (autoloadp final)
+                  (setq final (autoload-do-load final cmd)))))
+        (cond
+         ((arrayp final)
+          ;; If requested, place the macro in the command history.  For
+          ;; other sorts of commands, call-interactively takes care of this.
+          (when record-flag
+            (add-to-history
+             'command-history `(execute-kbd-macro ,final ,prefixarg) nil t))
+          (execute-kbd-macro final prefixarg))
+         (t
+          ;; Pass `cmd' rather than `final', for the backtrace's sake.
+          (prog1 (call-interactively cmd record-flag keys)
+            (when-let ((info
+                        (and (symbolp cmd)
+                             (not (get cmd 'command-execute-obsolete-warned))
+                             (get cmd 'byte-obsolete-info))))
+              (put cmd 'command-execute-obsolete-warned t)
+              (message "%s" (macroexp--obsolete-warning
+                             cmd info "command"
+                             (help--key-description-fontified
+                              (where-is-internal (car info) nil t))))))))))))
+
+(provide 'flower)
+(provide 'quoted)
+(provide 'listed)
+(provide 'values)
+
+'(flower quoted
+	 (listed values))
+	 
+
+(define-derived-mode backtrace-mode special-mode "Backtrace"
+  "Generic major mode for examining an Elisp stack backtrace.
+This mode can be used directly, or other major modes can be
+derived from it, using `define-derived-mode'.
+
+In this major mode, the buffer contains some optional lines of
+header text followed by backtrace frames, each consisting of one
+or more whole lines.
+
+Letters in this mode do not insert themselves; instead they are
+commands.
+\\<backtrace-mode-map>
+\\{backtrace-mode-map}
+
+A mode which inherits from Backtrace mode, or a command which
+creates a `backtrace-mode' buffer, should usually do the following:
+
+ - Set `backtrace-revert-hook', if the buffer contents need
+   to be specially recomputed prior to `revert-buffer'.
+ - Maybe set `backtrace-insert-header-function' to a function to create
+   header text for the buffer.
+ - Set `backtrace-frames' (see below).
+ - Maybe modify `backtrace-view' (see below).
+ - Maybe set `backtrace-print-function'.
+
+A command which creates or switches to a Backtrace mode buffer,
+such as `ert-results-pop-to-backtrace-for-test-at-point', should
+initialize `backtrace-frames' to a list of `backtrace-frame'
+objects (`backtrace-get-frames' is provided for that purpose, if
+desired), and may optionally modify `backtrace-view', which is a
+plist describing the appearance of the backtrace.  Finally, it
+should call `backtrace-print'.
+
+`backtrace-print' calls `backtrace-insert-header-function'
+followed by `backtrace-print-frame', once for each stack frame."
+  :syntax-table emacs-lisp-mode-syntax-table
+  (when backtrace-fontify
+    (setq font-lock-defaults
+          '((backtrace-font-lock-keywords
+             backtrace-font-lock-keywords-1
+             backtrace-font-lock-keywords-2)
+            nil nil nil nil
+	    (font-lock-syntactic-face-function
+	     . lisp-font-lock-syntactic-face-function))))
+  (setq truncate-lines t)
+  (buffer-disable-undo)
+  ;; In debug.el, from 1998 to 2009 this was set to nil, reason stated
+  ;; was because of bytecode. Since 2009 it's been set to t, but the
+  ;; default is t so I think this isn't necessary.
+  ;; (set-buffer-multibyte t)
+  (setq-local revert-buffer-function #'backtrace-revert)
+  (setq-local filter-buffer-substring-function #'backtrace--filter-visible)
+  (setq-local indent-line-function 'lisp-indent-line)
+  (setq-local indent-region-function 'lisp-indent-region)
+  (add-hook 'xref-backend-functions #'backtrace--xref-backend nil t))
+
+(put 'backtrace-mode 'mode-class 'special)
+
+;;;###autoload
+(defmacro define-derived-mode (child parent name &optional docstring &rest body)
+  "Create a new mode CHILD which is a variant of an existing mode PARENT.
+
+The arguments are as follows:
+
+CHILD:     the name of the command for the derived mode.
+PARENT:    the name of the command for the parent mode (e.g. `text-mode')
+           or nil if there is no parent.
+NAME:      a string that will appear in the mode line (e.g. \"HTML\")
+DOCSTRING: an optional documentation string--if you do not supply one,
+           the function will attempt to invent something useful.
+KEYWORD-ARGS:
+           optional arguments in the form of pairs of keyword and value.
+           The following keyword arguments are currently supported:
+
+           :group GROUP
+                   Declare the customization group that corresponds
+                   to this mode.  The command `customize-mode' uses this.
+           :syntax-table TABLE
+                   Use TABLE instead of the default (CHILD-syntax-table).
+                   A nil value means to simply use the same syntax-table
+                   as the parent.
+           :abbrev-table TABLE
+                   Use TABLE instead of the default (CHILD-abbrev-table).
+                   A nil value means to simply use the same abbrev-table
+                   as the parent.
+           :after-hook FORM
+                   A single Lisp form which is evaluated after the mode
+                   hooks have been run.  It should not be quoted.
+           :interactive BOOLEAN
+                   Whether the derived mode should be `interactive' or not.
+                   The default is t.
+
+BODY:      forms to execute just before running the
+           hooks for the new mode.  Do not use `interactive' here.
+
+Here is how you could define LaTeX-Thesis mode as a variant of LaTeX mode:
+
+  (define-derived-mode LaTeX-thesis-mode LaTeX-mode \"LaTeX-Thesis\")
+
+You could then make new key bindings for `LaTeX-thesis-mode-map'
+without changing regular LaTeX mode.  In this example, BODY is empty,
+and DOCSTRING is generated by default.
+
+As a more complex example, the following command uses `sgml-mode' as
+the parent, and then sets the variable `case-fold-search' to nil:
+
+  (define-derived-mode article-mode sgml-mode \"Article\"
+    \"Major mode for editing technical articles.\"
+    (setq case-fold-search nil))
+
+Note that if the documentation string had been left out, it would have
+been generated automatically, with a reference to the keymap.
+
+The new mode runs the hook named MODE-hook.  For `foo-mode',
+the hook will be named `foo-mode-hook'.
+
+See Info node `(elisp)Derived Modes' for more details.
+
+\(fn CHILD PARENT NAME [DOCSTRING] [KEYWORD-ARGS...] &rest BODY)"
+  (declare (debug (&define name symbolp sexp [&optional stringp]
+			   [&rest keywordp sexp] def-body))
+	   (doc-string 4)
+	   (indent defun))
+
+  (when (and docstring (not (stringp docstring)))
+    ;; Some trickiness, since what appears to be the docstring may really be
+    ;; the first element of the body.
+    (push docstring body)
+    (setq docstring nil))
+
+  (when (eq parent 'fundamental-mode) (setq parent nil))
+
+  (let ((map (derived-mode-map-name child))
+	(syntax (derived-mode-syntax-table-name child))
+	(abbrev (derived-mode-abbrev-table-name child))
+	(declare-abbrev t)
+	(declare-syntax t)
+	(hook (derived-mode-hook-name child))
+	(group nil)
+        (interactive t)
+        (after-hook nil))
+
+    ;; Process the keyword args.
+    (while (keywordp (car body))
+      (pcase (pop body)
+	(:group (setq group (pop body)))
+	(:abbrev-table (setq abbrev (pop body)) (setq declare-abbrev nil))
+	(:syntax-table (setq syntax (pop body)) (setq declare-syntax nil))
+        (:after-hook (setq after-hook (pop body)))
+        (:interactive (setq interactive (pop body)))
+	(_ (pop body))))
+
+    (setq docstring (derived-mode-make-docstring
+		     parent child docstring syntax abbrev))
+
+    `(progn
+       (defvar ,hook nil)
+       (unless (get ',hook 'variable-documentation)
+         (put ',hook 'variable-documentation
+              ,(format "Hook run after entering %s mode.
+No problems result if this variable is not bound.
+`add-hook' automatically binds it.  (This is true for all hook variables.)"
+                       name)))
+       (unless (boundp ',map)
+	 (put ',map 'definition-name ',child))
+       (with-no-warnings (defvar ,map (make-sparse-keymap)))
+       (unless (get ',map 'variable-documentation)
+	 (put ',map 'variable-documentation
+	      (purecopy ,(format "Keymap for `%s'." child))))
+       ,(if declare-syntax
+	    `(progn
+               (defvar ,syntax)
+	       (unless (boundp ',syntax)
+		 (put ',syntax 'definition-name ',child)
+		 (defvar ,syntax (make-syntax-table)))
+	       (unless (get ',syntax 'variable-documentation)
+		 (put ',syntax 'variable-documentation
+		      (purecopy ,(format "Syntax table for `%s'." child))))))
+       ,(if declare-abbrev
+	    `(progn
+               (defvar ,abbrev)
+	       (unless (boundp ',abbrev)
+		 (put ',abbrev 'definition-name ',child)
+		 (defvar ,abbrev
+		   (progn (define-abbrev-table ',abbrev nil) ,abbrev)))
+	       (unless (get ',abbrev 'variable-documentation)
+		 (put ',abbrev 'variable-documentation
+		      (purecopy ,(format "Abbrev table for `%s'." child))))))
+       (put ',child 'derived-mode-parent ',parent)
+       ,(if group `(put ',child 'custom-mode-group ,group))
+
+       (defun ,child ()
+	 ,docstring
+	 ,(and interactive '(interactive))
+					; Run the parent.
+	 (delay-mode-hooks
+
+	  (,(or parent 'kill-all-local-variables))
+					; Identify the child mode.
+	  (setq major-mode (quote ,child))
+	  (setq mode-name ,name)
+					; Identify special modes.
+	  ,(when parent
+	     `(progn
+		(if (get (quote ,parent) 'mode-class)
+		    (put (quote ,child) 'mode-class
+			 (get (quote ,parent) 'mode-class)))
+					; Set up maps and tables.
+		(unless (keymap-parent ,map)
+                  ;; It would probably be better to set the keymap's parent
+                  ;; at the toplevel rather than inside the mode function,
+                  ;; but this is not easy for at least the following reasons:
+                  ;; - the parent (and its keymap) may not yet be loaded.
+                  ;; - the parent's keymap name may be called something else
+                  ;;   than <parent>-mode-map.
+		  (set-keymap-parent ,map (current-local-map)))
+		,(when declare-syntax
+		   `(let ((parent (char-table-parent ,syntax)))
+		      (unless (and parent
+				   (not (eq parent (standard-syntax-table))))
+			(set-char-table-parent ,syntax (syntax-table)))))
+                ,(when declare-abbrev
+                   `(unless (or (abbrev-table-get ,abbrev :parents)
+                                ;; This can happen if the major mode defines
+                                ;; the abbrev-table to be its parent's.
+                                (eq ,abbrev local-abbrev-table))
+                      (abbrev-table-put ,abbrev :parents
+                                        (list local-abbrev-table))))))
+	  (use-local-map ,map)
+	  ,(when syntax `(set-syntax-table ,syntax))
+	  ,(when abbrev `(setq local-abbrev-table ,abbrev))
+					; Splice in the body (if any).
+	  ,@body
+	  )
+	 ,@(when after-hook
+	     `((push (lambda () ,after-hook) delayed-after-hook-functions)))
+	 ;; Run the hooks (and delayed-after-hook-functions), if any.
+	 (run-mode-hooks ',hook)))))
+
+
+;;;###autoload
+(defun customize-mode (mode)
+  "Customize options related to a major or minor mode.
+By default the current major mode is used.  With a prefix
+argument or if the current major mode has no known group, prompt
+for the MODE to customize."
+  (interactive
+   (list
+    (let ((completion-regexp-list '("-mode\\'"))
+	  (group (custom-group-of-mode major-mode)))
+      (if (and group (not current-prefix-arg))
+	  major-mode
+	(intern
+	 (completing-read (format-prompt "Mode" (and group major-mode))
+			  obarray
+			  'custom-group-of-mode
+			  t nil nil (if group (symbol-name major-mode))))))))
+  (customize-group (custom-group-of-mode mode)))
+

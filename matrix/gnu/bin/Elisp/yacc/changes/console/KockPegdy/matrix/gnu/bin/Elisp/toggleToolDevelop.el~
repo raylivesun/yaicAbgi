@@ -1,0 +1,128 @@
+*** Welcome to IELM ***  Type (describe-mode) or press C-h m for help.
+ELISP> (defun freezer-checkup-list (retro)
+  "The documentation series of features of card"
+  (let* (indent-region 1 0 512)
+    (setf x 512 y 512))
+  (setq x 512))
+
+freezer-checkup-list
+ELISP> (defun keymap-checkup-list (retro)
+  "The documentation series in checkup of maps"
+  (let* (indent-region 1 0 512)
+    (setf x 512 y 512))
+  (setq x 512)
+  (check-parens))
+
+keymap-checkup-list
+ELISP> (defun coffee-script-elisp (retro)
+  "The documentation coffee script in elisp to reporter pages"
+  (let* (indent-region 1 0 512)
+    (setf x 512 y 512)
+    (setq x 512))
+  (keymap-global-set 27 home))
+
+coffee-script-elisp
+ELISP> (defun coffee-script-elisp (retro)
+  "The documentation coffee script in elisp to reporter pages"
+  (let* (indent-region 1 0 512)
+    (setf x 512 y 512)
+    (setq x 512))
+  (keymap-global-set 27 home))
+
+coffee-script-elisp
+ELISP> (defun coffee-script-elisp (retro)
+	 "The documentation coffee script in elisp to reporter pages"
+	 (let* (indent-region 1 0 512)
+	   (setf x 512 y 512)
+	   (setq x 512))
+	 (keymap-local-set 27 home))
+coffee-script-elisp
+ELISP> (freezer-checkup-list 512)
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list (listp 512))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list (listp 1))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list 1)
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list x (+ x y))
+*** Eval error ***  Symbol’s value as variable is void: x
+ELISP> (freezer-checkup-list (+ x y))
+*** Eval error ***  Symbol’s value as variable is void: x
+ELISP> (freezer-checkup-list (setq x 512))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list (listp (setq x 512)))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list 0)
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list '1)
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list '(listp 1))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list retro)
+*** Eval error ***  Symbol’s value as variable is void: retro
+ELISP> (freezer-checkup-list '(retro))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list (indent-region 1 0 512))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list (+ 1 512))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list x)
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list 'x)
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (freezer-checkup-list (check-parens))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (keymap-checkup-list (check-parens))
+*** Eval error ***  Wrong type argument: listp, 1
+ELISP> (coffee-script-elisp (keymap-local-set 27 home))
+*** Eval error ***  Symbol’s value as variable is void: home
+ELISP> (coffee-script-elisp (keymap-local-set 27 x))
+*** Eval error ***  27 is not a valid key definition; see ‘key-valid-p’
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 1329) x))
+*** Eval error ***  nil is not a valid key definition; see ‘key-valid-p’
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) nil))
+*** Eval error ***  nil is not a valid key definition; see ‘key-valid-p’
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) home) nil)
+*** Eval error ***  Symbol’s value as variable is void: home
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) local) nil)
+*** Eval error ***  Symbol’s value as variable is void: local
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) (local-unset-key 27)) nil) 
+*** Eval error ***  Wrong type argument: arrayp, 27
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) (local-unset-key (arrayp 1 0 512)) nil) nil)
+*** Eval error ***  Wrong number of arguments: arrayp, 3
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) (local-unset-key 0) nil) nil)
+*** Eval error ***  Wrong type argument: arrayp, 0
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) (local-unset-key 512) nil) nil)
+*** Eval error ***  Wrong type argument: arrayp, 512
+ELISP> (coffee-script-elisp (keymap-local-set (key-valid-p 27) (local-unset-key 27) nil) nil)
+*** Eval error ***  Wrong type argument: arrayp, 27
+ELISP> (defun changes-toggle-input-method (retro)
+  "The documentation checkup list template plums pages"
+  (let* (indent-region 4 0 512)
+    (toggle-input-method arg (list 512))
+    (setq x 512)))
+changes-toggle-input-method
+ELISP> (changes-toggle-input-method (set p 512)) 
+*** Eval error ***  Symbol’s value as variable is void: p
+ELISP> (changes-toogle-input-method (set x 512))
+*** Eval error ***  Symbol’s function definition is void: changes-toogle-input-method
+ELISP> (changes-toggle-input-method (set x 512))
+*** Eval error ***  Wrong type argument: symbolp, 512
+ELISP> (changes-toggle-input-method (symbolp dest))
+*** Eval error ***  Symbol’s value as variable is void: dest
+ELISP> (changes-toggle-input-method (symbolp ~/))
+*** Eval error ***  Symbol’s value as variable is void: ~/
+ELISP> (changes-toggle-input-method (symbol ~ ))
+*** Eval error ***  Symbol’s function definition is void: symbol
+ELISP> (changes-toggle-input-method (symbolp ~ ))
+*** Eval error ***  Symbol’s value as variable is void: ~
+ELISP> (changes-toggle-input-method (car '(dest value))) 
+*** Eval error ***  Wrong type argument: listp, 4
+ELISP> (changes-toggle-input-method (car '((dest value)
+					   (come pres))))
+					   
+*** Eval error ***  Wrong type argument: listp, 4
+ELISP> (changes-toggle-input-method (bar))  
+*** Eval error ***  Symbol’s function definition is void: bar
+ELISP> 

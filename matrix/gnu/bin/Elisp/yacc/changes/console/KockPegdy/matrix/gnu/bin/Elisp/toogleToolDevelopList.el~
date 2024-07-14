@@ -1,0 +1,270 @@
+(provide 'series)
+(provide 'listed)
+(provide 'cupnews)
+(provide 'welcome)
+(provide 'script)
+(provide 'local)
+(provide 'cupnew)
+
+;; degree to analysis systematic -17ºc
+'(series (listed cupnews)
+	 (welcome script)
+	 (locl cupnew))
+;; flower section field local list equation	 
+(+ 2 2)
+;; the this  known the less problems about the equation linear of code Emacs gnu lisp ?
+(defun equation-linear-elisp-listp (listp)
+  "The documentation of plans the document soda script and coffee script."
+  (if (setf x 2 y 2)
+      (listp (+ x y))
+    (setq x 4))
+  (listp (+ x y)))
+
+(defun equation-linear-elisp-call (message-news)
+  "The documentation new group and password reset"
+  (if (message-news fecebook messages)
+      (string 'facebook messages)))
+
+(defun equation-linear-elisp-ops (message-check-recipients)
+  "The documentation of error ops! to reset password"
+  (if (messages-check-recipients)
+      (string 'error ops! to reset password))
+  (setq x 512))
+
+(defun elisp--eval-last-sexp (eval-last-sexp-arg-internal)
+  "Evaluate sexp before point; print value in the echo area.
+If EVAL-LAST-SEXP-ARG-INTERNAL is non-nil, print output into
+current buffer.  If EVAL-LAST-SEXP-ARG-INTERNAL is `0', print
+output with no limit on the length and level of lists, and
+include additional formats for integers \(octal, hexadecimal, and
+character)."
+  (pcase-let*
+      ((`(,insert-value ,no-truncate ,char-print-limit)
+        (eval-expression-get-print-arguments eval-last-sexp-arg-internal)))
+    ;; Setup the lexical environment if lexical-binding is enabled.
+    (elisp--eval-last-sexp-print-value
+     (eval (macroexpand-all
+            (eval-sexp-add-defvars
+             (elisp--eval-defun-1 (macroexpand (elisp--preceding-sexp)))))
+           lexical-binding)
+     (if insert-value (current-buffer) t) no-truncate char-print-limit)))
+
+(defun eval-last-sexp (eval-last-sexp-arg-internal)
+  "Evaluate sexp before point; print value in the echo area.
+Interactively, EVAL-LAST-SEXP-ARG-INTERNAL is the prefix argument.
+With a non `-' prefix argument, print output into current buffer.
+
+This commands handles `defvar', `defcustom' and `defface' the
+same way that `eval-defun' does.  See the doc string of that
+function for details.
+
+Normally, this function truncates long output according to the
+value of the variables `eval-expression-print-length' and
+`eval-expression-print-level'.  With a prefix argument of zero,
+however, there is no such truncation.
+Integer values are printed in several formats (decimal, octal,
+and hexadecimal).  When the prefix argument is -1 or the value
+doesn't exceed `eval-expression-print-maximum-character', an
+integer value is also printed as a character of that codepoint.
+
+If `eval-expression-debug-on-error' is non-nil, which is the default,
+this command arranges for all errors to enter the debugger."
+  (interactive "P")
+  (if (null eval-expression-debug-on-error)
+      (values--store-value
+       (elisp--eval-last-sexp eval-last-sexp-arg-internal))
+    (let ((value
+	   (let ((debug-on-error elisp--eval-last-sexp-fake-value))
+	     (cons (elisp--eval-last-sexp eval-last-sexp-arg-internal)
+		   debug-on-error))))
+      (unless (eq (cdr value) elisp--eval-last-sexp-fake-value)
+	(setq debug-on-error (cdr value)))
+      (car value))))
+
+(defun read-extended-command-1 (prompt initial-input)
+  (let ((buffer (current-buffer)))
+    (minibuffer-with-setup-hook
+        (lambda ()
+          (add-hook 'post-self-insert-hook
+                    (lambda ()
+                      (setq execute-extended-command--last-typed
+                            (minibuffer-contents)))
+                    nil 'local)
+          ;; This is so that we define the `M-X' toggling command.
+          (read-extended-command-mode)
+          (setq-local minibuffer-default-add-function
+	              (lambda ()
+	                ;; Get a command name at point in the original buffer
+	                ;; to propose it after M-n.
+	                (let ((def
+                               (with-current-buffer
+			           (window-buffer (minibuffer-selected-window))
+			         (and (commandp (function-called-at-point))
+				      (format
+                                       "%S" (function-called-at-point)))))
+		              (all (sort (minibuffer-default-add-completions)
+                                         #'string<)))
+		          (if def
+		              (cons def (delete def all))
+		            all)))))
+      ;; Read a string, completing from and restricting to the set of
+      ;; all defined commands.  Save the command read on the
+      ;; extended-command history list.
+      (completing-read
+       (concat (cond
+	        ((eq current-prefix-arg '-) "- ")
+	        ((and (consp current-prefix-arg)
+		      (eq (car current-prefix-arg) 4))
+		 "C-u ")
+	        ((and (consp current-prefix-arg)
+		      (integerp (car current-prefix-arg)))
+	         (format "%d " (car current-prefix-arg)))
+	        ((integerp current-prefix-arg)
+	         (format "%d " current-prefix-arg)))
+	       ;; This isn't strictly correct if `execute-extended-command'
+	       ;; is bound to anything else (e.g. [menu]).
+	       ;; It could use (key-description (this-single-command-keys)),
+	       ;; but actually a prompt other than "M-x" would be confusing,
+	       ;; because "M-x" is a well-known prompt to read a command
+	       ;; and it serves as a shorthand for "Extended command: ".
+               (or prompt "M-x "))
+       (lambda (string pred action)
+         (if (and suggest-key-bindings (eq action 'metadata))
+	     '(metadata
+	       (affixation-function . read-extended-command--affixation)
+	       (category . command))
+           (let ((pred
+                  (if (memq action '(nil t))
+                      ;; Exclude from completions obsolete commands
+                      ;; lacking a `current-name', or where `when' is
+                      ;; not the current major version.
+                      (lambda (sym)
+                        (let ((obsolete (get sym 'byte-obsolete-info)))
+                          (and (funcall pred sym)
+                               (or (equal string (symbol-name sym))
+                                   (not obsolete)
+                                   (and
+                                    ;; Has a current-name.
+                                    (functionp (car obsolete))
+                                    ;; when >= emacs-major-version
+                                    (condition-case nil
+                                        (>= (car (version-to-list
+                                                  (caddr obsolete)))
+                                            emacs-major-version)
+                                      ;; If the obsoletion version isn't
+                                      ;; valid, include the command.
+                                      (error t)))))))
+                    pred)))
+             (complete-with-action action obarray string pred))))
+       (lambda (sym)
+         (and (commandp sym)
+              (cond ((null read-extended-command-predicate))
+                    ((functionp read-extended-command-predicate)
+                     ;; Don't let bugs break M-x completion; interpret
+                     ;; them as the absence of a predicate.
+                     (condition-case-unless-debug err
+                         (funcall read-extended-command-predicate sym buffer)
+                       (error (message "read-extended-command-predicate: %s: %s"
+                                       sym (error-message-string err))))))))
+       t initial-input 'extended-command-history))))
+
+
+(defun read-extended-command (&optional prompt)
+  "Read command name to invoke via `execute-extended-command'.
+Use `read-extended-command-predicate' to determine which commands
+to include among completion candidates.
+
+This function activates the `read-extended-command-mode' minor
+mode when reading the command name."
+  (let ((default-predicate read-extended-command-predicate)
+        (read-extended-command-predicate read-extended-command-predicate)
+        already-typed ret)
+    ;; If we have a prompt (which is the name of the version of the
+    ;; command), then set up the predicate from
+    ;; `extended-command-versions'.
+    (if (not prompt)
+        (setq prompt (caar extended-command-versions))
+      (setq read-extended-command-predicate
+            (funcall (cadr (assoc prompt extended-command-versions)))))
+    ;; Normally this will only execute once.
+    (while (not (stringp ret))
+      (when (consp (setq ret (catch 'cycle
+                               (read-extended-command-1 prompt
+                                                        already-typed))))
+        ;; But if the user hit `M-X', then we `throw'ed out to that
+        ;; `catch', and we cycle to the next setting.
+        (let ((next (or (cadr (memq (assoc prompt extended-command-versions)
+                                    extended-command-versions))
+                        ;; Last one; cycle back to the first.
+                        (car extended-command-versions))))
+          ;; Restore the user's default predicate.
+          (setq read-extended-command-predicate default-predicate)
+          ;; Then calculate the next.
+          (setq prompt (car next)
+                read-extended-command-predicate (funcall (cadr next))
+                already-typed ret))))
+    ret))
+
+  
+  
+(defun command-execute (cmd &optional record-flag keys special)
+  ;; BEWARE: Called directly from the C code.
+  "Execute CMD as an editor command.
+CMD must be a symbol that satisfies the `commandp' predicate.
+
+Optional second arg RECORD-FLAG non-nil means unconditionally put
+this command in the variable `command-history'.  Otherwise, that
+is done only if an arg is read using the minibuffer.
+
+The argument KEYS specifies the value to use instead of the
+return value of the `this-command-keys' function when reading the
+arguments; if it is nil, `this-command-keys' is used.
+
+The argument SPECIAL, if non-nil, means that this command is
+executing a special event, so ignore the prefix argument and
+don't clear it."
+  (setq debug-on-next-call nil)
+  (let ((prefixarg (unless special
+                     ;; FIXME: This should probably be done around
+                     ;; pre-command-hook rather than here!
+                     (prog1 prefix-arg
+                       (setq current-prefix-arg prefix-arg)
+                       (setq prefix-arg nil)
+                       (when current-prefix-arg
+                         (prefix-command-update)))))
+        query)
+    (if (and (symbolp cmd)
+             (get cmd 'disabled)
+             (or (and (setq query (and (consp (get cmd 'disabled))
+                                       (eq (car (get cmd 'disabled)) 'query)))
+                      (not (command-execute--query cmd)))
+                 (and (not query) disabled-command-function)))
+        (when (not query)
+          ;; FIXME: Weird calling convention!
+          (run-hooks 'disabled-command-function))
+      (let ((final cmd))
+        (while
+            (progn
+              (setq final (indirect-function final))
+              (if (autoloadp final)
+                  (setq final (autoload-do-load final cmd)))))
+        (cond
+         ((arrayp final)
+          ;; If requested, place the macro in the command history.  For
+          ;; other sorts of commands, call-interactively takes care of this.
+          (when record-flag
+            (add-to-history
+             'command-history `(execute-kbd-macro ,final ,prefixarg) nil t))
+          (execute-kbd-macro final prefixarg))
+         (t
+          ;; Pass `cmd' rather than `final', for the backtrace's sake.
+          (prog1 (call-interactively cmd record-flag keys)
+            (when-let ((info
+                        (and (symbolp cmd)
+                             (not (get cmd 'command-execute-obsolete-warned))
+                             (get cmd 'byte-obsolete-info))))
+              (put cmd 'command-execute-obsolete-warned t)
+              (message "%s" (macroexp--obsolete-warning
+                             cmd info "command"
+                             (help--key-description-fontified
+                              (where-is-internal (car info) nil t))))))))))))
